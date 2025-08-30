@@ -30,6 +30,7 @@ export default function Board() {
         {/* Give props to Square component (child) */}
         <Square
           value={squares[0]}
+          // Execute handleClick(i) after button is clicked
           onSquareClick={() => handleClick(0)}
         />
         <Square value={squares[1]} onSquareClick={() => handleClick(1)}/>
