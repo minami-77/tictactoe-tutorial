@@ -5,7 +5,7 @@ function Square({value, onSquareClick}) {
   return (
     <button
       className="square"
-      // Call onSquareClick function from Board component (parent)
+      // Call onSquareClick(=>handleClick) function from Board component (parent)
       onClick={onSquareClick}
     >
       {value}
@@ -17,17 +17,20 @@ function Board({xIsNext, squares, onPlay}) {
 
   // Update an array
   function handleClick(i){
+    // Return when the selected square is already taken or the game is over
     if (squares[i] || calculateWinner(squares)) {
       return;
     }
-
+    //Copy an array of squares
     const nextSquares = squares.slice();
     if (xIsNext) {
+      // Update ith value of the array
       nextSquares[i] = "X"
     } else {
       nextSquares[i] = "O";
     }
-    // call onPlay function from Game component
+    // call onPlay(=>handlePlay) function from Game component
+    console.log("Boardから親に渡す nextSquares:", nextSquares);
     onPlay(nextSquares);
   }
 
@@ -74,10 +77,29 @@ export default function Game() {
   // current squares
   const currentSquares = history[history.length - 1];
 
+  //
   function handlePlay(nextSquares){
+    console.log("Gameで受け取った nextSquares:", nextSquares);
+
     setHistory([...history, nextSquares]);
     setXIsNext(!xIsNext);
   }
+
+  function jumpTo(nextMove){
+
+  }
+
+  const moves = history.map((squares, move)=>{
+    let description;
+    if (move > 0){
+      description = 'Go to move #' + move;
+    } else {
+      description = 'Go to game start';
+    }
+    return (
+      <li><button onClick = {()=> jumpTo(move)}>{description}</button></li>
+    )
+  })
 
   return (
     <div className = "game">
@@ -86,7 +108,7 @@ export default function Game() {
         <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay}/>
       </div>
       <div className="game-info">
-        <ol>{}</ol>
+        <ol>{moves}</ol>
       </div>
     </div>
   );
