@@ -70,23 +70,24 @@ function Board({xIsNext, squares, onPlay}) {
 }
 // Main function
 export default function Game() {
-  // who is the next player
-  const [xIsNext, setXIsNext] = useState(true);
   // keep track the history of squares on each turns
   const [history, setHistory] = useState([Array(9).fill(null)]);
+  const [currentMove, setCurrentMove] =useState(0);
+  // who is the next player
+  const xIsNext = currentMove % 2 === 0;
   // current squares
-  const currentSquares = history[history.length - 1];
+  const currentSquares = history[currentMove];
 
   //
   function handlePlay(nextSquares){
     console.log("Gameで受け取った nextSquares:", nextSquares);
-
-    setHistory([...history, nextSquares]);
-    setXIsNext(!xIsNext);
+    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+    setHistory(nextHistory);
+    setCurrentMove(nextHistory.length - 1);
   }
 
   function jumpTo(nextMove){
-
+    setCurrentMove(nextMove);
   }
 
   const moves = history.map((squares, move)=>{
@@ -97,7 +98,9 @@ export default function Game() {
       description = 'Go to game start';
     }
     return (
-      <li><button onClick = {()=> jumpTo(move)}>{description}</button></li>
+      <li key={move}>
+        <button onClick = {()=> jumpTo(move)}>{description}</button>
+      </li>
     )
   })
 
