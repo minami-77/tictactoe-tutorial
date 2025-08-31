@@ -1,11 +1,10 @@
 import { useState } from "react";
 
 function Square({value, onSquareClick}) {
-
   return (
     <button
       className="square"
-      // Call onSquareClick(=>handleClick) function from Board component (parent)
+      // Call the onSquareClick function passed from the Board component (parent)
       onClick={onSquareClick}
     >
       {value}
@@ -14,27 +13,29 @@ function Square({value, onSquareClick}) {
 }
 
 function Board({xIsNext, squares, onPlay}) {
-
-  // Update an array
+  // Handle a click on a square
   function handleClick(i){
-    // Return when the selected square is already taken or the game is over
+    // Ignore the click if the square is already filled or the game has a winner
     if (squares[i] || calculateWinner(squares)) {
       return;
     }
-    //Copy an array of squares
+    // Create a copy of the current squares array (do not mutate the original)
     const nextSquares = squares.slice();
     if (xIsNext) {
-      // Update ith value of the array
+      // Place "X" or "O" depending on whose turn it is
       nextSquares[i] = "X"
     } else {
       nextSquares[i] = "O";
     }
-    // call onPlay(=>handlePlay) function from Game component
-    console.log("Boardから親に渡す nextSquares:", nextSquares);
+    // Call the onPlay (→ handlePlay) function from the Game component, passing the new board state (nextSquares)
+    // → This triggers Game's handlePlay(), which updates the history
+    console.log("Pass nextSquares from Board component:", nextSquares);
     onPlay(nextSquares);
   }
 
+  // Check if there's a winner
   const winner = calculateWinner(squares);
+  // Display the game status (winner or next player)
   let status;
   if (winner) {
     status = "Winner: " + winner;
@@ -46,12 +47,9 @@ function Board({xIsNext, squares, onPlay}) {
     <>
       <div className="status">{status}</div>
       <div className="board-row">
-        {/* Give props to Square component (child) */}
-        <Square
-          value={squares[0]}
-          // Execute handleClick(i) after button is clicked
-          onSquareClick={() => handleClick(0)}
-        />
+        {/* Give props to Square component */}
+        {/* Arrow function: call handleClick(0) only after the button is clicked */}
+        <Square value={squares[0]} onSquareClick={() => handleClick(0)}/>
         <Square value={squares[1]} onSquareClick={() => handleClick(1)}/>
         <Square value={squares[2]} onSquareClick={() => handleClick(2)}/>
       </div>
@@ -68,29 +66,32 @@ function Board({xIsNext, squares, onPlay}) {
     </>
   );
 }
-// Main function
+// Main component
 export default function Game() {
-  // keep track the history of squares on each turns
+  // Keep track of the history of board states (each element is an array of 9 squares)
   const [history, setHistory] = useState([Array(9).fill(null)]);
+  // Track the current move index
   const [currentMove, setCurrentMove] =useState(0);
-  // who is the next player
+  // Determine whose turn it is (even: X, odd: O)
   const xIsNext = currentMove % 2 === 0;
-  // current squares
+  // Get the board state for the current move
   const currentSquares = history[currentMove];
 
-  //
+  // Called by the Board component with the new board state (nextSquares) when a move is made
   function handlePlay(nextSquares){
-    console.log("Gameで受け取った nextSquares:", nextSquares);
+    console.log("Received nextSquares on Game component:", nextSquares);
+    // Add nextSquares to history (discarding any "future" moves if we had time-traveled)
     const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+    // Update the history and currentMove
     setHistory(nextHistory);
     setCurrentMove(nextHistory.length - 1);
   }
-
+  // Jump to a specific move in history
   function jumpTo(nextMove){
     setCurrentMove(nextMove);
   }
-
-  const moves = history.map((squares, move)=>{
+    // Generate the list of moves for time travel
+    const moves = history.map((squares, move)=>{
     let description;
     if (move > 0){
       description = 'Go to move #' + move;
@@ -98,6 +99,8 @@ export default function Game() {
       description = 'Go to game start';
     }
     return (
+      // React requires a unique "key" for list items to identify and update them efficiently.
+      // Here, "move" (the turn index) is used as a unique key.
       <li key={move}>
         <button onClick = {()=> jumpTo(move)}>{description}</button>
       </li>
@@ -107,7 +110,7 @@ export default function Game() {
   return (
     <div className = "game">
       <div className="game-board">
-        {/* pass props to Board component(child) */}
+        {/* pass props to Board */}
         <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay}/>
       </div>
       <div className="game-info">
@@ -117,7 +120,7 @@ export default function Game() {
   );
 }
 
-
+// Utility function to check if someone has won
 function calculateWinner(squares) {
   const lines =[
     [0, 1, 2],
