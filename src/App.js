@@ -13,7 +13,7 @@ function Square({value, onSquareClick}) {
   );
 }
 
-function Board(xIsNext, squares, onPlay) {
+function Board({xIsNext, squares, onPlay}) {
 
   // Update an array
   function handleClick(i){
@@ -27,6 +27,7 @@ function Board(xIsNext, squares, onPlay) {
     } else {
       nextSquares[i] = "O";
     }
+    // call onPlay function from Game component
     onPlay(nextSquares);
   }
 
@@ -67,7 +68,7 @@ function Board(xIsNext, squares, onPlay) {
 // Main function
 export default function Game() {
   // who is the next player
-  const [xIsNext, setIsNext] = useState(true);
+  const [xIsNext, setXIsNext] = useState(true);
   // keep track the history of squares on each turns
   const [history, setHistory] = useState([Array(9).fill(null)]);
   // current squares
